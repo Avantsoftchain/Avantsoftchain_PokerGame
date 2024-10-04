@@ -1,54 +1,107 @@
-# Pokérole
+## Technologies Used
 
-Work-in-progress [FoundryVTT](https://foundryvtt.com/) system for [Pokérole](https://www.pokeroleproject.com/). **Note that this system is in early development, using it in actual games is not recommended as features are missing and non-backwards compatible changes to data will occur.**
+### Frontend:
 
-Partially based on [Boilerplate](https://gitlab.com/asacolips-projects/foundry-mods/boilerplate) and [dnd5e](https://github.com/foundryvtt/dnd5e). Powered by [Pokerole-Data](https://github.com/Willowlark/Pokerole-Data).
+- **React Ecosystem:**
+  - Project was bootstrapped with **create-react-app**
+  - UI-Layer was created with **React**
+  - **React router** was used to implement client-side routing
+  - State Management is handled with the **Context-API** (built into React core-library)
+  - **Styled Components** were used to create all of the custom CSS
+- Communication with the Backend is handled with **Axios** (REST-API) & **Socket.io** (Game logic)
+- All localized strings and static page content (e.g. privacy policy) is stored in **Contentful** (cloud-based Headless-CMS) and retrieved via their Content Delivery API
 
-## Installation
-Open the *Game Systems* tab and click *Install System*, then enter `https://raw.githubusercontent.com/Pokerole-Software-Development/foundry-pokerole/main/system.json` as the manifest URL and click *Install*.
+### Backend:
 
-## Usage
+- **Node.js** & **Express.js**
+- **mongoDb** is used as the database & **mongoose** as ORM
+- Authentication is implemented with **JSON Web Tokens**
+  - Passwords are encrypted with **bcrypt**
+- The client-server communication for the game-logic is implemented with **Socket.io**
+- Uses **nodemailer** to send out transactional mails via Mailjet SMTP
+- Security-packages included to make the application more robust are: **helmet**, **hpp**, **express-rate-limit** & **express-mongo-sanitize**
 
-### Trainer character creation
-Trainer sheets are not yet supported, but you can create a Pokémon sheet in the "Actors" tab and add all missing skills in the meantime.
+## Features
 
-### Pokémon character creation
+- User can register & login into the frontend application
+  - Password is stored encrypted in DB (!)
+  - Authentication is handled via JWT-webtokens to secure API-transactions & private routes
+- Basic form of Virtual Gaming Currency
+  - User gets a specific amount of VGC after registration, they can use this amount to play on any open table. Should their balance drop to zero they get the same starting amount again for free.
+- App screens: Landing Page, Lobby (choose table etc.), Login Screen / Modal, Registration Screen / Modal, User Dashboard, Game UI
+- User can join a table and play poker ⇒ full game-loop + In-game chat implemented, Functional animations to support visual gameplay experience
+- Localization for two languages implemented (DE, EN)
 
-Open the compendium in the second tab from the right and go to the "Pokémon" tab. Right-click a Pokémon you'd like to use and click "Import". The newly imported Pokémon will now show up in the Actors tab. Click the "Rank" dropdown menu to choose a starting rank and distribute skills and attributes.
+## Design Mock-ups
 
-### Success-based rolls
-Pokérole is a d6-based role-playing system, where most rolls are based on successes. Whether action rolls are successful is determined by how many of the rolled dice (also referred to as the "dice pool") come up as 4 or higher.
+You can find the Figma-files with the design mock-ups for this app [here](https://www.figma.com/file/Vh4zssZy2ZhMxLGkcNJA7a/Vintage-Poker-Design-Copy?node-id=0%3A1).
 
-This system adds a custom chat command for convenient success-based rolls: Enter `/sc` (or `/successroll`) followed by a space and the number of dice you want to roll in the chat. While a token is selected, you can also enter a formula based on your attributes and skills, such as `/sc dexterity+channel+2`.
+## In-depth Project Documentation
 
-Some effects require chance dice rolls instead of success-based rolls. These rolls succeed when any of the rolled dice come up as a 6. You can use the command `/cd` (or `/chancedice`) followed by a number or formula to roll with this behavior.
+The more detailed project documentation can be found [here](https://www.notion.so/Vintage-Poker-Working-Title-2fa245a71d374bf787a13cf39e3e08dd).
 
-## Tips
-- Click the icon on a move on the character sheet to automatically roll for accuracy and damage.
-- You can configure the combat tracker to show a tracked value for each character: click the Cog icon (Combat Tracker Settings) in the "Combat Encounters" tab to select a resource like `hp.value`.
-- Drag moves, items and abilities from a character sheet into the macro bar at the bottom of the screen to activate the item's effects via hotkeys.
-- Assign characters to each user by right-clicking their name under "Players" in the bottom right and selecting "User Configuration". This allows players to roll without selecting a token.
-- You can skip the dialog for accuracy rolls and attribute checks by holding the Shift key while clicking the "Roll Accuracy" button or an attribute in the character sheet.
-- Right-click any tab on the right to open it in a movable window. Especially useful to show the chat while in combat.
-- Use the "Select Targets" tool under "Token Controls" to automatically apply damage to enemy tokens on damage rolls.
+## Quick Start
 
-## Recommended modules
+### Set-up MongoDB
 
-This system implements special support for the following optional modules:
-- [Dice So Nice](https://foundryvtt.com/packages/dice-so-nice/): Adds 3D animation to dice rolls. Custom roll commands such as `/sc` are supported.
-- [Item Piles](https://foundryvtt.com/packages/item-piles): Adds lootable objects that can be added to the canvas, item trading between players, merchants and more. If this module is installed, it is automatically configured with the right settings to work with this system.
-- [PopOut](https://foundryvtt.com/packages/popout): Allows displaying documents in a separate window.
+Set-up either a local mongoDB instance or create a [cloud-hosted instance](https://www.mongodb.com/). Save your db username + passsword and the mongoDb connection-string as you will need it for the next step.
 
-The following modules are known to work and provide useful functionality:
-- [Quick Insert - Search Widget](https://foundryvtt.com/packages/quick-insert): Adds a search tool that can be accessed with Ctrl+Space. Useful for searching through the large compendiums.
-- [Next Up](https://foundryvtt.com/packages/Next-Up): Adds a config option to automatically open the active combatant's character sheet. Useful for Storytellers in battle.
+### Add a "local.env" file in the "/server/config" folder with the following entries
 
-## Development
+```
+  MONGO_URI=<YOUR_MONGODB_URI>
+  JWT_SECRET=<YOUR_JWT_SECRET>
+  PORT=<YOUR_SERVER_PORT>
+  NODE_ENV=development
+  SMTP_HOST=<YOUR_SMTP_HOST>
+  SMTP_PORT=<YOUR_SMTP_PORT>
+  SMTP_USER=<YOUR_SMTP_USER>
+  SMTP_PW=<YOUR_SMTP_PASSWORD>
+```
 
-### Compiling the CSS
+### Set-up Contentful
 
-This repository includes SCSS files that must be compiled to CSS. Run `npm install` followed by `npm run gulp` to automatically watch for changes in SCSS files.
+Create a free community [Contentful-Account](https://www.contentful.com/get-started/) and create a new Space. Add two locales (en, de) with "en" being the fallback for the german-locale. Create a Content Delivery API Key and copy your space token and Contentful Delivery API access-token to the clipboard, as you will need it for the next step.
 
-### Installation from source
+You can use the [Contentful CLI](https://www.npmjs.com/package/contentful-cli) to import the space backup from the "contentful"-folder into your own Contentful space. This backup includes all localized key-value pairs and the content of the static pages.
 
-Run `npm install` followed by `npm run build`, then copy/symlink this folder to `[Foundry data directory]/Data/systems/pokerole`.
+### Add a ".env.local" file in the "/client" folder with the following entries
+
+```
+  REACT_APP_CONTENTFUL_SPACE_ID=<YOUR_CONTENTFUL_SPACE_ID>
+  REACT_APP_CONTENTFUL_ACCESS_TOKEN=<YOUR_CONTENTFUL_ACCESS_TOKEN>
+  REACT_APP_GOOGLE_ANALYTICS_TRACKING_ID=<YOUR_GOOGLE_ANALYTICS_TRACKING_ID>
+  REACT_APP_SERVER_URI=<YOUR_BACKEND_URI_HOST_PORT>
+```
+
+### Install server dependencies
+
+```bash
+npm install
+```
+
+### Install client dependencies
+
+```bash
+cd client
+npm install
+```
+
+### Run both Express & React from root project-directory
+
+```bash
+npm run dev
+```
+
+### Build for production
+
+```bash
+cd client
+npm run build
+```
+
+### Test production before deploy
+
+```bash
+NODE_ENV=production node server.js
+```
